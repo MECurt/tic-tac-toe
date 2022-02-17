@@ -23,21 +23,14 @@ class Board extends React.Component {
 	render() {
 		return (
 			<div>
-				<div className="board-row">
-					{this.renderSquare(0)}
-					{this.renderSquare(1)}
-					{this.renderSquare(2)}
-				</div>
-				<div className="board-row">
-					{this.renderSquare(3)}
-					{this.renderSquare(4)}
-					{this.renderSquare(5)}
-				</div>
-				<div className="board-row">
-					{this.renderSquare(6)}
-					{this.renderSquare(7)}
-					{this.renderSquare(8)}
-				</div>
+				{[0, 1, 2].map(i=>{
+					return (
+						<div className="board-row">
+							{[i*3, i*3+1, i*3+2].map(j => {
+								return this.renderSquare(j);
+							})}
+						</div>);
+				})}
 			</div>
 		);
 	}
@@ -63,7 +56,8 @@ class Game extends React.Component {
 			squares[i] = this.state.xTurn ? 'X' : 'O';
 			this.setState({
 				history: history.concat([{
-					squares:squares
+					squares:squares,
+					pos: i
 				}]),
 				xTurn: !this.state.xTurn,
 				stepNumber:history.length
@@ -85,20 +79,22 @@ class Game extends React.Component {
 
 		const moves = history.map((step, move)=> {
 			const desc = move ?
-				'Go to move #' + move :
+				'Go to move #' + move + ' (' + Math.floor(step.pos/3) + ', ' + step.pos%3 + ')':
 				'Go to game start';
 			return (
 				<li key={move}>
 					<button onClick={()=>this.jumpTo(move)}>
-						{desc}
+						{this.state.stepNumber == move ? <b>{desc}</b> : desc}
 					</button>
 				</li>
-			)
+			);
 		});
 
 		let status;
 		if (winner) {
 			status = 'Winner: ' + winner;
+		} else if (this.state.stepNumber === 9){
+			status = 'Draw!'
 		} else {
 			status = 'Next player: ' + (this.state.xTurn ? 'X' : 'O');
 		}
